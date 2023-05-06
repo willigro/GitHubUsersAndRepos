@@ -7,8 +7,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import com.rittmann.users.UserNavigation
-import com.rittmann.users.list.userGraph
+import com.rittmann.users.navigation.UserNavigation
+import com.rittmann.users.navigation.userGraph
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
