@@ -116,7 +116,10 @@ object Depends {
             implement("androidx.activity:activity-compose:${Versions.ACTIVITY_COMPOSE}")
             implement("androidx.compose.ui:ui-test-manifest:${Versions.COMPOSE}")
             implement("androidx.compose.material3:material3:1.0.0-alpha01")
-            implement("androidx.paging:paging-compose:1.0.0-alpha19")
+            implement("androidx.paging:paging-compose:1.0.0-alpha10")
+
+            implement("androidx.hilt:hilt-navigation-compose:1.0.0-alpha02")
+            implement("androidx.navigation:navigation-compose:2.5.3")
 
             implement("androidx.lifecycle:lifecycle-viewmodel-compose:${Versions.LIFECYCLE}")
             implement("androidx.lifecycle:lifecycle-viewmodel-savedstate:${Versions.LIFECYCLE}")
