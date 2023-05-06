@@ -1,15 +1,19 @@
 package com.rittmann.users.data
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.paging.PagingData
 import com.rittmann.components.lifecycle.DoOnCreate
 import com.rittmann.components.ui.TextH1
+import com.rittmann.datasource.network.data.RepositoryResult
 import com.rittmann.datasource.network.data.UserDataResult
+import com.rittmann.users.repos.UserReposList
 import kotlinx.coroutines.flow.StateFlow
 
 
@@ -25,18 +29,29 @@ fun UserDataScreenRoot(
     }
 
     UserDataScreen(
-        userDataState = userDataViewModel.userData
+        userDataState = userDataViewModel.userData,
+        reposState = userDataViewModel.repos,
     )
 }
 
 @Composable
-fun UserDataScreen(userDataState: StateFlow<UserDataResult?>) {
+fun UserDataScreen(
+    userDataState: StateFlow<UserDataResult?>,
+    reposState: StateFlow<PagingData<RepositoryResult>>,
+) {
     val userData = userDataState.collectAsState().value
 
     if (userData != null) {
-        TextH1(
-            text = userData.name,
-            modifier = Modifier.background(Color.Red),
-        )
+        Column {
+            TextH1(
+                text = userData.name,
+                modifier = Modifier.background(Color.Red),
+            )
+
+            UserReposList(
+                modifier = Modifier,
+                reposState = reposState
+            )
+        }
     }
 }

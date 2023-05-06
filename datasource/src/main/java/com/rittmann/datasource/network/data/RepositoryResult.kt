@@ -2,11 +2,8 @@ package com.rittmann.datasource.network.data
 
 import com.google.gson.annotations.SerializedName
 
-class RepositoryResult(
-    val items: List<Repository>
-)
 
-class Repository(
+class RepositoryResult(
     val id: String = "",
 
     val name: String? = "",
