@@ -1,4 +1,4 @@
-package com.rittmann.users
+package com.rittmann.users.navigation
 
 sealed class UserNavigation(val destination: String) {
     object Users : UserNavigation("users")
