@@ -3,9 +3,9 @@ package com.rittmann.datasource.usecase.users
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
+import com.rittmann.datasource.models.UserRepresentation
 import com.rittmann.datasource.network.data.RepositoryResult
 import com.rittmann.datasource.network.data.UserDataResult
-import com.rittmann.datasource.network.data.UsersResult
 import com.rittmann.datasource.repositories.users.UsersRepository
 import com.rittmann.datasource.usecase.result.ResultUC
 import com.rittmann.datasource.usecase.result.fails
@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
 interface UsersUseCase {
-    fun fetchUsers(): Flow<PagingData<UsersResult>>
+    fun fetchUsers(user: String): Flow<PagingData<UserRepresentation>>
     fun fetchUserData(user: String): Flow<ResultUC<UserDataResult>>
     fun fetchRepositories(user: UserDataResult): Flow<PagingData<RepositoryResult>>
 }
@@ -25,12 +25,12 @@ class UsersUseCaseImpl @Inject constructor(
     private val usersRepository: UsersRepository,
 ) : UsersUseCase {
 
-    override fun fetchUsers(): Flow<PagingData<UsersResult>> = Pager(
+    override fun fetchUsers(user: String): Flow<PagingData<UserRepresentation>> = Pager(
         config = PagingConfig(
             pageSize = PagingUsers.PAGE_SIZE,
         ),
         pagingSourceFactory = {
-            PagingUsers(usersRepository)
+            PagingUsers(user = user, usersRepository = usersRepository)
         }
     ).flow
 
