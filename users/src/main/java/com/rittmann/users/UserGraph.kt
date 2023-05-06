@@ -14,17 +14,7 @@ import com.rittmann.components.ui.TextBodyBold
 
 fun NavGraphBuilder.userGraph(navController: NavController) {
     composable(UserNavigation.Users.destination) {
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Red)
-            .clickable {
-                navController.navigate(
-                    UserNavigation.UserData.transformDestination(
-                        "Testing data"
-                    )
-                )
-            }
-        )
+        UsersScreenRoot(navController = navController)
     }
 
     composable(UserNavigation.UserData.destination) { backStackEntry ->

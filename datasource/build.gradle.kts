@@ -1,3 +1,4 @@
+import Depends.Compose.implementCompose
 import Depends.Hilt.implementHilt
 import Depends.Core.implementCoreKtx
 import Depends.ViewModel.implementViewModel
@@ -29,6 +30,10 @@ dependencies {
 
     // =========== Test ==============
     implementTest()
+
+    // =========== Compose ==============
+    // TODO: load only navigation
+    implementCompose()
 
     implementation( "org.jetbrains.kotlin:kotlin-reflect:${Versions.KOTLIN_VERSION}")
 }
