@@ -14,6 +14,8 @@ data class AppDimensions(
     val paddingTopBetweenComponentsSmall: Dp = 6.dp,
     val paddingTopBetweenComponentsMedium: Dp = 12.dp,
 
+    val progressAppendingItems: Dp = 16.dp,
+
     // Size
     val progressSize: Dp = 100.dp,
 )

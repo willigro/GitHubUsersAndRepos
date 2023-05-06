@@ -18,16 +18,21 @@ fun ProgressScreen(modifier: Modifier, isLoadingState: StateFlow<Boolean>) {
     val isLoading = isLoadingState.collectAsState().value
 
     if (isLoading) {
-        Box(
-            modifier = modifier
-                .fillMaxSize()
-                .background(Color.Gray.copy(alpha = AppTheme.floats.progressAlpha)),
-            contentAlignment = Alignment.Center
-        ) {
-            CircularProgressIndicator(
-                modifier = Modifier
-                    .size(AppTheme.dimensions.progressSize)
-            )
-        }
+        ProgressScreen(modifier)
+    }
+}
+
+@Composable
+fun ProgressScreen(modifier: Modifier) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color.Gray.copy(alpha = AppTheme.floats.progressAlpha)),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator(
+            modifier = Modifier.size(AppTheme.dimensions.progressSize),
+            color = AppTheme.colors.primary,
+        )
     }
 }
