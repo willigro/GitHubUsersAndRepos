@@ -9,4 +9,8 @@ sealed class UserNavigation(val destination: String) {
         const val KEY = "user"
         fun transformDestination(user: String) = "user_data/$user"
     }
+
+    companion object {
+        const val ROUTE = "user"
+    }
 }

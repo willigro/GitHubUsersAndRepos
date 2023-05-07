@@ -1,5 +1,6 @@
 package com.rittmann.users.list
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -7,8 +8,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -21,10 +27,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.paging.LoadState
-import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.items
 import com.rittmann.components.R
 import com.rittmann.components.lifecycle.DoOnCreate
 import com.rittmann.components.theme.AppTheme
@@ -32,10 +34,11 @@ import com.rittmann.components.ui.ProgressScreen
 import com.rittmann.components.ui.SearchTextField
 import com.rittmann.components.ui.TextBodyBold
 import com.rittmann.components.ui.TextH1
-import com.rittmann.components.ui.isError
 import com.rittmann.datasource.models.UserRepresentation
 import com.rittmann.datasource.throwable.UserNotFound
 import com.rittmann.users.navigation.UserNavigation
+import java.io.IOException
+import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 fun UsersScreenRoot(
@@ -46,11 +49,10 @@ fun UsersScreenRoot(
         usersViewModel.fetchUsers("")
     }
 
-    val users = usersViewModel.users.collectAsLazyPagingItems()
-
     UsersScreen(
         navController = navController,
-        usersPaging = users,
+        usersState = usersViewModel.users,
+        pagingUiState = usersViewModel.pagingUiState,
         fetchUser = usersViewModel::fetchUsers,
     )
 }
@@ -58,7 +60,8 @@ fun UsersScreenRoot(
 @Composable
 fun UsersScreen(
     navController: NavController,
-    usersPaging: LazyPagingItems<UserRepresentation>,
+    usersState: StateFlow<List<UserRepresentation>>,
+    pagingUiState: PagingUiState,
     fetchUser: (String) -> Unit,
 ) {
     ConstraintLayout(
@@ -82,55 +85,95 @@ fun UsersScreen(
             fetchUser = fetchUser,
         )
 
-        Box(
-            modifier = Modifier.constrainAs(errorContainer) {
+        ListingUserContainer(
+            modifierErrorContainer = Modifier.constrainAs(errorContainer) {
                 top.linkTo(searchBarContainer.bottom)
                 start.linkTo(parent.start)
                 end.linkTo(parent.end)
-            }
-        ) {
-            ListingUsersError(users = usersPaging)
-        }
-
-        LazyColumn(
-            modifier = Modifier.constrainAs(listContainer) {
+            },
+            modifierListing = Modifier.constrainAs(listContainer) {
                 top.linkTo(errorContainer.bottom)
                 start.linkTo(parent.start)
                 end.linkTo(parent.end)
                 bottom.linkTo(loadingMoreContainer.top)
 
                 height = Dimension.fillToConstraints
-            }
-        ) {
-            items(
-                lazyPagingItems = usersPaging,
-            ) { user ->
-                if (user != null) {
-                    TextBodyBold(
-                        text = user.login,
-                        modifier = Modifier
-                            .padding(AppTheme.dimensions.paddingMedium)
-                            .clickable {
-                                navController.navigate(
-                                    UserNavigation.UserData.transformDestination(
-                                        user.login
-                                    )
-                                )
-                            },
-                    )
-                }
-            }
-        }
-
-        ListingUsersProgress(
-            modifier = Modifier.constrainAs(loadingMoreContainer) {
+            },
+            modifierLoading = Modifier.constrainAs(loadingMoreContainer) {
                 start.linkTo(parent.start)
                 end.linkTo(parent.end)
                 bottom.linkTo(parent.bottom)
             },
-            users = usersPaging,
+            navController = navController,
+            usersState = usersState,
+            pagingUiState = pagingUiState,
+            fetchUser = fetchUser,
         )
     }
+}
+
+@SuppressLint("ModifierParameter")
+@Composable
+fun ListingUserContainer(
+    modifierErrorContainer: Modifier,
+    modifierListing: Modifier,
+    modifierLoading: Modifier,
+    navController: NavController,
+    usersState: StateFlow<List<UserRepresentation>>,
+    pagingUiState: PagingUiState,
+    fetchUser: (String) -> Unit,
+) {
+    val listState = pagingUiState.listState
+
+    ListingUsersError(
+        modifier = modifierErrorContainer,
+        listState = listState,
+        fetchUser = fetchUser,
+    )
+
+    val lazyColumnListState = rememberLazyListState()
+
+    val shouldStartPaginate = remember {
+        derivedStateOf {
+            pagingUiState.canPaginate && (lazyColumnListState.layoutInfo.visibleItemsInfo.lastOrNull()?.index
+                ?: -9) >= (lazyColumnListState.layoutInfo.totalItemsCount - 6)
+        }
+    }
+
+    val users = usersState.collectAsState().value
+
+    LaunchedEffect(key1 = shouldStartPaginate.value) {
+        if (shouldStartPaginate.value && listState is ListState.IDLE) {
+            fetchUser("")
+        }
+    }
+
+    LazyColumn(
+        state = lazyColumnListState,
+        modifier = modifierListing
+    ) {
+        items(
+            users
+        ) { user ->
+            TextBodyBold(
+                text = user.login,
+                modifier = Modifier
+                    .padding(AppTheme.dimensions.paddingMedium)
+                    .clickable {
+                        navController.navigate(
+                            UserNavigation.UserData.transformDestination(
+                                user.login
+                            )
+                        )
+                    },
+            )
+        }
+    }
+
+    ListingUsersProgress(
+        modifier = modifierLoading,
+        listState = listState,
+    )
 }
 
 @Composable
@@ -152,15 +195,13 @@ fun UsersSearchBar(
 @Composable
 fun ListingUsersProgress(
     modifier: Modifier,
-    users: LazyPagingItems<UserRepresentation>,
+    listState: ListState,
 ) {
-    val loadState = users.loadState
-
     Box(
         modifier = modifier.fillMaxWidth(),
         contentAlignment = Alignment.Center,
     ) {
-        if (loadState.append == LoadState.Loading) {
+        if (listState is ListState.PAGINATING) {
             CircularProgressIndicator(
                 modifier = Modifier.padding(AppTheme.dimensions.progressAppendingItems),
                 color = AppTheme.colors.primary,
@@ -168,38 +209,46 @@ fun ListingUsersProgress(
         }
     }
 
-    if (loadState.refresh == LoadState.Loading) {
+    if (listState is ListState.LOADING) {
         ProgressScreen(modifier = Modifier)
     }
 }
 
 @Composable
-fun ListingUsersError(users: LazyPagingItems<UserRepresentation>) {
-    when (val error = users.loadState.isError()) {
-        is UserNotFound -> {
-            error.printStackTrace()
+fun ListingUsersError(
+    modifier: Modifier,
+    listState: ListState,
+    fetchUser: (String) -> Unit,
+) {
+    Box(modifier = modifier) {
+        if (listState is ListState.ERROR) {
+            when (val error = listState.throwable) {
+                is UserNotFound -> {
+                    error.printStackTrace()
 
-            TextH1(
-                text = stringResource(id = R.string.user_list_user_not_found),
-                modifier = Modifier
-                    .padding(AppTheme.dimensions.paddingSmall)
-                    // TODO remove COLOR reference and use AppTheme (whole app)
-                    .background(Color.Blue)
-                    .fillMaxWidth()
-            )
-        }
-        is Throwable -> {
-            error.printStackTrace()
+                    TextH1(
+                        text = stringResource(id = R.string.user_list_user_not_found),
+                        modifier = Modifier
+                            .padding(AppTheme.dimensions.paddingSmall)
+                            // TODO remove COLOR reference and use AppTheme (whole app)
+                            .background(Color.Blue)
+                            .fillMaxWidth()
+                    )
+                }
+                is IOException -> {
+                    error.printStackTrace()
 
-            TextH1(
-                text = stringResource(id = R.string.tap_to_retry),
-                modifier = Modifier
-                    .padding(AppTheme.dimensions.paddingSmall)
-                    // TODO remove COLOR reference and use AppTheme (whole app)
-                    .background(Color.Red)
-                    .fillMaxWidth()
-                    .clickable { users.retry() }
-            )
+                    TextH1(
+                        text = stringResource(id = R.string.tap_to_retry),
+                        modifier = Modifier
+                            .padding(AppTheme.dimensions.paddingSmall)
+                            // TODO remove COLOR reference and use AppTheme (whole app)
+                            .background(Color.Red)
+                            .fillMaxWidth()
+                            .clickable { fetchUser("") }
+                    )
+                }
+            }
         }
     }
 }
