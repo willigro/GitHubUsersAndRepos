@@ -52,7 +52,7 @@ class UserDataResult (
     @SerializedName("site_admin")
     val siteAdmin: Boolean,
 
-    val name: String,
+    val name: String?,
     val company: String,
     val blog: String,
     val location: String,

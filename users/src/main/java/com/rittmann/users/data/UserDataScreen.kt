@@ -41,10 +41,10 @@ fun UserDataScreen(
 ) {
     val userData = userDataState.collectAsState().value
 
-    if (userData != null) {
+    userData?.name?.also { name ->
         Column {
             TextH1(
-                text = userData.name,
+                text = name,
                 modifier = Modifier.background(Color.Red),
             )
 
