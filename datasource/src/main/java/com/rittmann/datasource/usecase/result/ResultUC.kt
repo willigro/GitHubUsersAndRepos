@@ -45,7 +45,7 @@ suspend fun <T> FlowCollector<ResultUC.Success<T>>.success(result: T) {
     emit(ResultUC.success(result))
 }
 
-suspend fun FlowCollector<ResultUC.Failure>.fails(throwable: Exception? = null) {
+suspend fun FlowCollector<ResultUC.Failure>.fails(throwable: Throwable? = null) {
     emit(ResultUC.failure(throwable = throwable))
 }
 

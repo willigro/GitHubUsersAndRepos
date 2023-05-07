@@ -16,6 +16,7 @@ import com.rittmann.datasource.usecase.result.success
 import com.rittmann.datasource.usecase.users.paging.PagingRepositories
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 
 interface UsersUseCase {
@@ -38,30 +39,26 @@ class UsersUseCaseImpl @Inject constructor(
         page: Int,
         perPage: Int,
     ): Flow<ResultUC<List<UserRepresentation>>> = flow {
-        try {
-            if (user.isEmpty()) {
-                success(
-                    usersRepository.fetchUsers(since = page, perPage = perPage).map {
-                        it.toUserRepresentation()
-                    }
-                )
-            } else {
-                val result = usersRepository.fetchUserData(user)
-
-                if (result == null) {
-                    failsThrowable<UserNotFound>()
-                } else {
-                    success(
-                        arrayListOf(
-                            result.toUserRepresentation()
-                        )
-                    )
+        if (user.isEmpty()) {
+            success(
+                usersRepository.fetchUsers(since = page, perPage = perPage).map {
+                    it.toUserRepresentation()
                 }
+            )
+        } else {
+            val result = usersRepository.fetchUserData(user)
+
+            if (result == null) {
+                failsThrowable<UserNotFound>()
+            } else {
+                success(
+                    arrayListOf(
+                        result.toUserRepresentation()
+                    )
+                )
             }
-        } catch (e: Exception) {
-            fails(e)
         }
-    }
+    }.catch { fails(it) }
 
     override fun fetchUserData(user: String): Flow<ResultUC<UserDataResult>> = flow {
         val result = usersRepository.fetchUserData(user)
@@ -71,7 +68,7 @@ class UsersUseCaseImpl @Inject constructor(
         } else {
             emit(ResultUC.success(result))
         }
-    }
+    }.catch { fails(it) }
 
     override fun fetchRepositories(user: UserDataResult): Flow<PagingData<RepositoryResult>> =
         Pager(
