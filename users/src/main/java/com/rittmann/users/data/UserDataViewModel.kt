@@ -3,6 +3,7 @@ package com.rittmann.users.data
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
+import com.rittmann.datasource.lifecycle.DispatcherProvider
 import com.rittmann.datasource.network.data.RepositoryResult
 import com.rittmann.datasource.network.data.UserDataResult
 import com.rittmann.datasource.usecase.users.UsersUseCase
@@ -11,10 +12,12 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class UserDataViewModel @Inject constructor(
+    private val dispatcherProvider: DispatcherProvider,
     private val usersUseCase: UsersUseCase,
 ) : ViewModel() {
 
@@ -28,18 +31,22 @@ class UserDataViewModel @Inject constructor(
         get() = _repos
 
     fun fetchUserData(user: String) = viewModelScope.launch {
-        usersUseCase.fetchUserData(user).collectLatest {
-            _userData.value = it.getOrNull()
+        usersUseCase.fetchUserData(user)
+            .flowOn(dispatcherProvider.io)
+            .collectLatest {
+                _userData.value = it.getOrNull()
 
-            fetchRepositories()
-        }
+                fetchRepositories()
+            }
     }
 
     private fun fetchRepositories() = viewModelScope.launch {
         _userData.value?.also { user ->
-            usersUseCase.fetchRepositories(user).collectLatest {
-                _repos.value = it
-            }
+            usersUseCase.fetchRepositories(user)
+                .flowOn(dispatcherProvider.io)
+                .collectLatest {
+                    _repos.value = it
+                }
         }
     }
 }

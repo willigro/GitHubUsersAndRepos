@@ -15,7 +15,7 @@ class UseCaseModule {
 
     @Singleton
     @Provides
-    fun providesWeatherUseCase(
+    fun providesUsersUseCase(
         usersRepository: UsersRepository,
     ): UsersUseCase = UsersUseCaseImpl(
         usersRepository,

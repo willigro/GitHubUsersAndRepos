@@ -1,5 +1,6 @@
 package com.rittmann.datasource.repositories.di
 
+import com.rittmann.datasource.lifecycle.DispatcherProvider
 import com.rittmann.datasource.network.api.GitHubApi
 import com.rittmann.datasource.repositories.users.UsersRepository
 import com.rittmann.datasource.repositories.users.UsersRepositoryImpl
@@ -15,9 +16,11 @@ class RepositoryModule {
 
     @Singleton
     @Provides
-    fun provideWeatherRepository(
+    fun provideUsersRepository(
+        dispatcherProvider: DispatcherProvider,
         gitHubApi: GitHubApi,
     ): UsersRepository = UsersRepositoryImpl(
+        dispatcherProvider,
         gitHubApi,
     )
 }

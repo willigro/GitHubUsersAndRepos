@@ -5,6 +5,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.rittmann.datasource.lifecycle.DispatcherProvider
 import com.rittmann.datasource.models.UserRepresentation
 import com.rittmann.datasource.usecase.users.UsersUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -12,10 +13,12 @@ import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 
 @HiltViewModel
 class UsersViewModel @Inject constructor(
+    private val dispatcherProvider: DispatcherProvider,
     private val usersUseCase: UsersUseCase,
 ) : ViewModel() {
 
@@ -38,6 +41,7 @@ class UsersViewModel @Inject constructor(
             pagingUiState.configureLoadingState()
 
             usersUseCase.fetchUsers(name, pagingUiState.page, PagingUiState.PAGE_SIZE)
+                .flowOn(dispatcherProvider.io)
                 .collectLatest { usersResult ->
                     val result = usersResult.getOrNull()
 

@@ -27,7 +27,7 @@ object AppTheme {
 }
 
 @Composable
-fun WeatherTheme(
+fun GitHubTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
     typography: AppTypography = AppTheme.typography,
     dimensions: AppDimensions = AppTheme.dimensions,

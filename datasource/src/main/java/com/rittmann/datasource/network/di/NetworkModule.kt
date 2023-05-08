@@ -43,7 +43,7 @@ class NetworkModule {
 
     @Provides
     @Singleton
-    fun provideWeatherApi(
+    fun provideGithubApi(
         retrofit: Retrofit
     ): GitHubApi {
         return retrofit.create(GitHubApi::class.java)

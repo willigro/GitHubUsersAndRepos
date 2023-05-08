@@ -10,6 +10,7 @@ import androidx.paging.PagingData
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import com.rittmann.components.ui.TextBodyBold
+import com.rittmann.components.ui.error
 import com.rittmann.datasource.network.data.RepositoryResult
 import kotlinx.coroutines.flow.StateFlow
 
@@ -25,6 +26,17 @@ fun UserReposList(
             .fillMaxWidth()
             .background(Color.Black)
     ) {
+        item {
+            if (repos.loadState.error() != null) {
+                TextBodyBold(
+                    text = "Error",
+                    modifier = Modifier
+                        .background(Color.Yellow)
+                        .fillMaxWidth()
+                )
+            }
+        }
+
         items(
             lazyPagingItems = repos,
         ) { repo ->
