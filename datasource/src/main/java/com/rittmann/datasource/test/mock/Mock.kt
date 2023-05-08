@@ -1,5 +1,6 @@
 package com.rittmann.datasource.test.mock
 
+import com.rittmann.datasource.models.UserRepresentation
 import com.rittmann.datasource.network.data.UserDataResult
 import com.rittmann.datasource.network.data.UsersResult
 
@@ -69,4 +70,10 @@ val mockUserDataResult = UserDataResult(
     following = 0L,
     createdAt = "",
     updatedAt = "",
+)
+
+val mockUserRepresentation = UserRepresentation(
+    login = "login",
+    name = "name",
+    avatarUrl = "avatarUrl",
 )

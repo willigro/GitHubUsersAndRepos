@@ -6,7 +6,6 @@ import androidx.paging.PagingData
 import com.rittmann.datasource.mappers.toUserRepresentation
 import com.rittmann.datasource.models.UserRepresentation
 import com.rittmann.datasource.network.data.RepositoryResult
-import com.rittmann.datasource.network.data.UserDataResult
 import com.rittmann.datasource.repositories.users.UsersRepository
 import com.rittmann.datasource.throwable.UserNotFound
 import com.rittmann.datasource.usecase.result.ResultUC
@@ -26,8 +25,8 @@ interface UsersUseCase {
         perPage: Int,
     ): Flow<ResultUC<List<UserRepresentation>>>
 
-    fun fetchUserData(user: String): Flow<ResultUC<UserDataResult>>
-    fun fetchRepositories(user: UserDataResult): Flow<PagingData<RepositoryResult>>
+    fun fetchUserData(user: String): Flow<ResultUC<UserRepresentation>>
+    fun fetchRepositories(userLogin: String): Flow<PagingData<RepositoryResult>>
 }
 
 class UsersUseCaseImpl @Inject constructor(
@@ -60,23 +59,23 @@ class UsersUseCaseImpl @Inject constructor(
         }
     }.catch { fails(it) }
 
-    override fun fetchUserData(user: String): Flow<ResultUC<UserDataResult>> = flow {
+    override fun fetchUserData(user: String): Flow<ResultUC<UserRepresentation>> = flow {
         val result = usersRepository.fetchUserData(user)
 
         if (result == null) {
             fails()
         } else {
-            emit(ResultUC.success(result))
+            emit(ResultUC.success(result.toUserRepresentation()))
         }
     }.catch { fails(it) }
 
-    override fun fetchRepositories(user: UserDataResult): Flow<PagingData<RepositoryResult>> =
+    override fun fetchRepositories(userLogin: String): Flow<PagingData<RepositoryResult>> =
         Pager(
             config = PagingConfig(
                 pageSize = PagingRepositories.PAGE_SIZE,
             ),
             pagingSourceFactory = {
-                PagingRepositories(usersRepository, user.login)
+                PagingRepositories(usersRepository, userLogin)
             }
         ).flow
 }

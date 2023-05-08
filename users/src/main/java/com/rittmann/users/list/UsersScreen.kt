@@ -4,13 +4,17 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.Divider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -21,15 +25,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImage
 import com.rittmann.components.R
 import com.rittmann.components.lifecycle.DoOnCreate
 import com.rittmann.components.theme.AppTheme
+import com.rittmann.components.ui.Background
 import com.rittmann.components.ui.ProgressScreen
 import com.rittmann.components.ui.SearchTextField
 import com.rittmann.components.ui.TextBodyBold
@@ -64,10 +71,14 @@ fun UsersScreen(
     pagingUiState: PagingUiState,
     fetchUser: (String) -> Unit,
 ) {
+    val showLoadingScreen = remember {
+        mutableStateOf(false)
+    }
+
     ConstraintLayout(
         modifier = Modifier
+            .padding(AppTheme.dimensions.paddingScreen)
             .fillMaxSize()
-            .background(Color.Black)
     ) {
         val (
             searchBarContainer,
@@ -108,8 +119,13 @@ fun UsersScreen(
             usersState = usersState,
             pagingUiState = pagingUiState,
             fetchUser = fetchUser,
+            loadingScreen = {
+                showLoadingScreen.value = it
+            }
         )
     }
+
+    ProgressScreen(modifier = Modifier, isLoadingState = showLoadingScreen)
 }
 
 @SuppressLint("ModifierParameter")
@@ -122,6 +138,7 @@ fun ListingUserContainer(
     usersState: StateFlow<List<UserRepresentation>>,
     pagingUiState: PagingUiState,
     fetchUser: (String) -> Unit,
+    loadingScreen: (Boolean) -> Unit,
 ) {
     val listState = pagingUiState.listState
 
@@ -155,10 +172,12 @@ fun ListingUserContainer(
         items(
             users
         ) { user ->
-            TextBodyBold(
-                text = user.login,
+            Row(
                 modifier = Modifier
-                    .padding(AppTheme.dimensions.paddingMedium)
+                    .fillMaxWidth()
+                    .padding(
+                        top = AppTheme.dimensions.paddingTopBetweenComponentsMedium
+                    )
                     .clickable {
                         navController.navigate(
                             UserNavigation.UserData.transformDestination(
@@ -166,6 +185,32 @@ fun ListingUserContainer(
                             )
                         )
                     },
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                AsyncImage(
+                    modifier = Modifier.size(AppTheme.dimensions.iconSizeSmall),
+                    model = user.avatarUrl,
+                    placeholder = painterResource(id = R.drawable.placeholder),
+                    contentDescription = null,
+                )
+
+                // TODO Could limit the width, jumping line or whatever
+                TextBodyBold(
+                    text = user.login,
+                    modifier = Modifier
+                        .padding(start = AppTheme.dimensions.paddingMedium),
+                    textAlign = TextAlign.Start
+                )
+            }
+
+            Divider(
+                modifier = Modifier
+                    .background(AppTheme.colors.secondary)
+                    .height(AppTheme.dimensions.divisor)
+                    .fillMaxWidth()
+                    .padding(
+                        top = AppTheme.dimensions.paddingTopBetweenComponentsSmall
+                    ),
             )
         }
     }
@@ -173,6 +218,7 @@ fun ListingUserContainer(
     ListingUsersProgress(
         modifier = modifierLoading,
         listState = listState,
+        loadingScreen = loadingScreen,
     )
 }
 
@@ -196,6 +242,7 @@ fun UsersSearchBar(
 fun ListingUsersProgress(
     modifier: Modifier,
     listState: ListState,
+    loadingScreen: (Boolean) -> Unit,
 ) {
     Box(
         modifier = modifier.fillMaxWidth(),
@@ -210,7 +257,9 @@ fun ListingUsersProgress(
     }
 
     if (listState is ListState.LOADING) {
-        ProgressScreen(modifier = Modifier)
+        loadingScreen(true)
+    } else {
+        loadingScreen(false)
     }
 }
 
@@ -230,8 +279,6 @@ fun ListingUsersError(
                         text = stringResource(id = R.string.user_list_user_not_found),
                         modifier = Modifier
                             .padding(AppTheme.dimensions.paddingSmall)
-                            // TODO remove COLOR reference and use AppTheme (whole app)
-                            .background(Color.Blue)
                             .fillMaxWidth()
                     )
                 }
@@ -242,8 +289,6 @@ fun ListingUsersError(
                         text = stringResource(id = R.string.tap_to_retry),
                         modifier = Modifier
                             .padding(AppTheme.dimensions.paddingSmall)
-                            // TODO remove COLOR reference and use AppTheme (whole app)
-                            .background(Color.Red)
                             .fillMaxWidth()
                             .clickable { fetchUser("") }
                     )

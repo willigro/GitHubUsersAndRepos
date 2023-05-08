@@ -6,18 +6,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.MutableState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.rittmann.components.theme.AppTheme
-import kotlinx.coroutines.flow.StateFlow
 
 @Composable
-fun ProgressScreen(modifier: Modifier, isLoadingState: StateFlow<Boolean>) {
-    val isLoading = isLoadingState.collectAsState().value
-
-    if (isLoading) {
+fun ProgressScreen(modifier: Modifier, isLoadingState: MutableState<Boolean>) {
+    if (isLoadingState.value) {
         ProgressScreen(modifier)
     }
 }

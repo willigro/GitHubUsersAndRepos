@@ -4,7 +4,7 @@ import androidx.paging.PagingData
 import app.cash.turbine.test
 import com.rittmann.datasource.network.data.RepositoryResult
 import com.rittmann.datasource.test.dispatcher.MainCoroutineRule
-import com.rittmann.datasource.test.mock.mockUserDataResult
+import com.rittmann.datasource.test.mock.mockUserRepresentation
 import com.rittmann.datasource.usecase.result.ResultUC
 import com.rittmann.datasource.usecase.users.UsersUseCase
 import io.mockk.every
@@ -64,11 +64,11 @@ class UserDataViewModelTest {
         every {
             usersUseCase.fetchUserData(user)
         } returns flowOf(
-            ResultUC.success(mockUserDataResult)
+            ResultUC.success(mockUserRepresentation)
         )
 
         every {
-            usersUseCase.fetchRepositories(mockUserDataResult)
+            usersUseCase.fetchRepositories(mockUserRepresentation.login)
         } returns flowOf(
             pagingRepos
         )
@@ -76,7 +76,7 @@ class UserDataViewModelTest {
         viewModel.fetchUserData(user)
 
         viewModel.userData.test {
-            assertThat(mockUserDataResult, `is`(awaitItem()))
+            assertThat(mockUserRepresentation, `is`(awaitItem()))
             cancelAndIgnoreRemainingEvents()
         }
 
@@ -86,7 +86,7 @@ class UserDataViewModelTest {
         }
 
         verify { usersUseCase.fetchUserData(user) }
-        verify { usersUseCase.fetchRepositories(mockUserDataResult) }
+        verify { usersUseCase.fetchRepositories(mockUserRepresentation.login) }
     }
 
     @Test
@@ -116,17 +116,17 @@ class UserDataViewModelTest {
             every {
                 usersUseCase.fetchUserData(user)
             } returns flowOf(
-                ResultUC.success(mockUserDataResult)
+                ResultUC.success(mockUserRepresentation)
             )
 
             every {
-                usersUseCase.fetchRepositories(mockUserDataResult)
+                usersUseCase.fetchRepositories(mockUserRepresentation.login)
             } throws IOException()
 
             viewModel.fetchUserData(user)
 
             viewModel.userData.test {
-                assertThat(mockUserDataResult, `is`(awaitItem()))
+                assertThat(mockUserRepresentation, `is`(awaitItem()))
                 cancelAndIgnoreRemainingEvents()
             }
 
@@ -136,6 +136,6 @@ class UserDataViewModelTest {
             }
 
             verify { usersUseCase.fetchUserData(user) }
-            verify { usersUseCase.fetchRepositories(mockUserDataResult) }
+            verify { usersUseCase.fetchRepositories(mockUserRepresentation.login) }
         }
 }

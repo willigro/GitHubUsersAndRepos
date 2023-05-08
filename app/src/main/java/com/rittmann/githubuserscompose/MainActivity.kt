@@ -8,6 +8,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
+import com.rittmann.components.theme.GitHubTheme
 import com.rittmann.users.navigation.UserNavigation
 import com.rittmann.users.navigation.userGraph
 import dagger.hilt.android.AndroidEntryPoint
@@ -17,7 +18,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            NavigationGraph(rememberNavController())
+            GitHubTheme {
+                NavigationGraph(rememberNavController())
+            }
         }
     }
 }

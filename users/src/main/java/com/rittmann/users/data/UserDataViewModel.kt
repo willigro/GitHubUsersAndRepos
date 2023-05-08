@@ -4,8 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import com.rittmann.datasource.lifecycle.DispatcherProvider
+import com.rittmann.datasource.models.UserRepresentation
 import com.rittmann.datasource.network.data.RepositoryResult
-import com.rittmann.datasource.network.data.UserDataResult
 import com.rittmann.datasource.usecase.users.UsersUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -21,8 +21,8 @@ class UserDataViewModel @Inject constructor(
     private val usersUseCase: UsersUseCase,
 ) : ViewModel() {
 
-    private val _userData: MutableStateFlow<UserDataResult?> = MutableStateFlow(null)
-    val userData: StateFlow<UserDataResult?>
+    private val _userData: MutableStateFlow<UserRepresentation?> = MutableStateFlow(null)
+    val userData: StateFlow<UserRepresentation?>
         get() = _userData
 
     private val _repos: MutableStateFlow<PagingData<RepositoryResult>> =
@@ -42,7 +42,7 @@ class UserDataViewModel @Inject constructor(
 
     private fun fetchRepositories() = viewModelScope.launch {
         _userData.value?.also { user ->
-            usersUseCase.fetchRepositories(user)
+            usersUseCase.fetchRepositories(user.login)
                 .flowOn(dispatcherProvider.io)
                 .collectLatest {
                     _repos.value = it
