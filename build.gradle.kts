@@ -64,7 +64,7 @@ fun Project.androidCompile() {
             versionCode = Versions.VERSION_CODE
             versionName = Versions.VERSION_NAME
 
-            // testInstrumentationRunner = Depends.Test.ANDROID_JUNIT_RUNNER
+             testInstrumentationRunner = Depends.Test.ANDROID_JUNIT_RUNNER
         }
 
         buildTypes {

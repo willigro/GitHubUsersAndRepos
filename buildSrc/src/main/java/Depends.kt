@@ -110,7 +110,6 @@ object Depends {
             implement("androidx.compose.ui:ui:${Versions.COMPOSE}")
             implement("androidx.compose.material:material:${Versions.COMPOSE}")
             implement("androidx.compose.ui:ui-tooling-preview:${Versions.COMPOSE}")
-            androidTestImplement("androidx.compose.ui:ui-test-junit4:${Versions.COMPOSE}")
             debugImplementation("androidx.compose.ui:ui-tooling:${Versions.COMPOSE}")
             implement("androidx.constraintlayout:constraintlayout-compose:${Versions.CONSTRAINT_COMPOSE}")
             implement("androidx.activity:activity-compose:${Versions.ACTIVITY_COMPOSE}")
@@ -161,19 +160,22 @@ object Depends {
             "org.jetbrains.kotlinx:kotlinx-coroutines-test:${Versions.COROUTINES}"
 
         fun DependencyHandler.implementTest() {
-            testImplement(JUNIT)
+            implement(JUNIT)
 
             implement(TEST_CORE)
             testImplement(TEST_CORE_KTX)
             testImplement(TEXT_EXT_KTX_JUNIT)
             testImplement(TEXT_EXT_JUNIT)
-            testImplement(COROUTINES_TEST)
+            implement(COROUTINES_TEST)
             testImplement(ARCH_CORE_TEST)
             testImplement(ROBOLETRIC)
             testImplement(HAMCREST)
 
             testImplement(MOCKK)
             testImplement(MOCKK_AGENT)
+
+            androidTestImplement("androidx.compose.ui:ui-test-junit4:${Versions.COMPOSE}")
+            testImplement("app.cash.turbine:turbine:0.9.0")
         }
     }
 }

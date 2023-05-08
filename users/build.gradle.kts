@@ -3,6 +3,7 @@ import Depends.Hilt.implementHilt
 import Depends.Core.implementCoreKtx
 import Depends.Glide.implementGlide
 import Depends.Module.implementModules
+import Depends.Test.implementTest
 import Depends.ViewModel.implementViewModel
 
 plugins {
@@ -43,4 +44,7 @@ dependencies {
 
     // =========== Glide ==============
     implementGlide()
+
+    // =========== Test ==============
+    implementTest()
 }

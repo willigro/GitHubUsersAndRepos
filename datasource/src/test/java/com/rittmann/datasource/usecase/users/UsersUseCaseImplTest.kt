@@ -1,7 +1,7 @@
 package com.rittmann.datasource.usecase.users
 
-import com.rittmann.datasource.mock.mockUserDataResult
-import com.rittmann.datasource.mock.mockUsers
+import com.rittmann.datasource.test.mock.mockUserDataResult
+import com.rittmann.datasource.test.mock.mockUsers
 import com.rittmann.datasource.repositories.users.UsersRepository
 import com.rittmann.datasource.throwable.UserNotFound
 import io.mockk.coEvery

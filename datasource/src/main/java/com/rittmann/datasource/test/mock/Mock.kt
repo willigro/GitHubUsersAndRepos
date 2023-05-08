@@ -1,4 +1,4 @@
-package com.rittmann.datasource.mock
+package com.rittmann.datasource.test.mock
 
 import com.rittmann.datasource.network.data.UserDataResult
 import com.rittmann.datasource.network.data.UsersResult
